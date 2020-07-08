@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# @author Alberto Ferreira (alberto.ferreira@feedzai.com)
+
 #set -e
 
 export LIGHTGBM_VERSION="$1"
