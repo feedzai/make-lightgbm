@@ -9,6 +9,7 @@ export PACKAGE_VERSION="$2"
 export MAKE_LIGHTGBM_URL="$(git config --get remote.origin.url)"
 export COMMIT="$(cat build/__commit_id__)"
 export PACKAGE_TIMESTAMP="$(cat build/__timestamp__)"
+export LIGHTGBM_REPO_URL="$(cat build/__lightgbm_repo_url__)"
 
 if [[ "$PACKAGE_VERSION" == "0.0.0" ]]; then
     VERSION="$PACKAGE_VERSION-$LIGHTGBM_VERSION"
@@ -22,5 +23,6 @@ sed -e 's,${VERSION},'"$VERSION"',g' \
     -e 's,${MAKE_LIGHTGBM_URL},'"$MAKE_LIGHTGBM_URL"',g' \
     -e 's,${COMMIT},'"$COMMIT"',g' \
     -e 's,${PACKAGE_TIMESTAMP},'"$PACKAGE_TIMESTAMP"',g' \
+    -e 's,${LIGHTGBM_REPO_URL},'"$LIGHTGBM_REPO_URL"',g' \
     pom_template.xml > build/pom.xml
 

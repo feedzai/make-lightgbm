@@ -23,6 +23,10 @@ If no `package_version` is specified:
  
 Finally, in the output `pom.xml`, the package version is the one specified in `package_version`, except if it is `0.0.0`. In that case the build version becomes `package_version-lightgbm_version`.
 
+### Building from another LightGBM repository
+
+By defining the environment variable `LIGHTGBM_REPO_URL` which by default points to [LightGBM](https://github.com/microsoft/LightGBM), to another `http(s)` git LightGBM repo URL, you can build your own custom version of LightGBM. This can be useful to try building our own patched/custom versions of LightGBM. Ensure you use the _http(s)_ protocol instead of _git_.
+
 ## Output artifacts
 
 This is the output:

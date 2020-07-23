@@ -27,9 +27,10 @@
     Build created with command: `bash make.sh ${LIGHTGBM_VERSION} ${PACKAGE_VERSION}`
 
     ---
-    
+
     Build info:
-    
+
+    LIGHTGBM_REPO_URL=${LIGHTGBM_REPO_URL}
     LIGHTGBM_VERSION=${LIGHTGBM_VERSION}
     LIGHTGBM_COMMIT=${COMMIT}
     PACKAGE_TIMESTAMP=${PACKAGE_TIMESTAMP}
