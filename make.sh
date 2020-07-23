@@ -18,6 +18,8 @@
 
 set -e
 
+export LIGHTGBM_REPO_URL="${LIGHTGBM_REPO_URL:-https://github.com/microsoft/LightGBM}"
+
 LIGHTGBM_VERSION=$([[ -z "$1" ]] && echo "master" || echo "$1")
 PACKAGE_VERSION="$2"
 if [[ -z "$PACKAGE_VERSION" ]]; then
@@ -41,7 +43,7 @@ echo_stage "Building LightGBM CI docker image replica..."
 bash make_docker_image.sh
 
 echo_stage "Launching container..."
-container=$(docker run -t -d lightgbm-ci-build-env)
+container=$(docker run -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env)
 docker cp make_lightgbm.sh $container:/lightgbm
 echo_bold "Running container: $container"
 
@@ -62,6 +64,7 @@ docker cp $container:/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 build
 docker cp $FROM/build/__commit_id__ build
 echo "$LIGHTGBM_VERSION" > build/__version__
 date +"%y/%m/%d %T" > build/__timestamp__
+echo "$LIGHTGBM_REPO_URL" > build/__lightgbm_repo_url__
 
 echo_bold "Create pom..."
 bash make_pom.sh "$LIGHTGBM_VERSION" "$PACKAGE_VERSION"
