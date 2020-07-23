@@ -38,6 +38,25 @@ function echo_bold() {
     echo -e "\e[1m$1\e[0m"
 }
 
+echo_stage "Checking need to build a new version..."
+BUILD_COMMIT_ID_FILE=build/__commit_id__
+if [[ -f $BUILD_COMMIT_ID_FILE ]]; then
+    # Query tag's commit:
+    REQUESTED_BUILD_VERSION_COMMIT=`git ls-remote $LIGHTGBM_REPO_URL $LIGHTGBM_VERSION | cut -f1`
+    # No output? Error or queried a valid commit id. Assume it is a commit:
+    REQUESTED_BUILD_VERSION_COMMIT=${REQUESTED_BUILD_VERSION_COMMIT:-$LIGHTGBM_VERSION}
+
+    BUILT_COMMIT_ID=`cat $BUILD_COMMIT_ID_FILE`
+    if [[ "$BUILT_COMMIT_ID" == "$REQUESTED_BUILD_VERSION_COMMIT" ]]; then
+        echo "Found build/ contents to be up-to-date. Skipping build."
+        exit
+    else
+        echo "build/ is not up-to-date. Proceeding with build."
+
+        echo "Old build commit id: $BUILT_COMMIT_ID"
+        echo "New build commit id: $REQUESTED_BUILD_VERSION_COMMIT"
+    fi
+fi
 
 echo_stage "Building LightGBM CI docker image replica..."
 bash make_docker_image.sh
