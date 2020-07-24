@@ -24,5 +24,5 @@ sed -e 's,${VERSION},'"$VERSION"',g' \
     -e 's,${COMMIT},'"$COMMIT"',g' \
     -e 's,${PACKAGE_TIMESTAMP},'"$PACKAGE_TIMESTAMP"',g' \
     -e 's,${LIGHTGBM_REPO_URL},'"$LIGHTGBM_REPO_URL"',g' \
-    pom_template.xml > build/pom.xml
+    resources/pom_template.xml > build/pom.xml
 

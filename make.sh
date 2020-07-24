@@ -87,8 +87,7 @@ echo "$LIGHTGBM_REPO_URL" > build/__lightgbm_repo_url__
 
 echo_bold "Create pom..."
 bash make_pom.sh "$LIGHTGBM_VERSION" "$PACKAGE_VERSION"
-cp install_jar_locally.sh build/
-cp resources/libopenmp.licence build/
+cp resources/copy_to_build/* build/
 
 echo_stage "Cleaning up..."
 echo_bold "Stopping and removing container..."
