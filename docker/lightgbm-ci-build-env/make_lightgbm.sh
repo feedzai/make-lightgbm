@@ -20,8 +20,8 @@ set -e
 
 # Usage: $1 serves to checkout a specific commit/tag
 
-echo "Cloning $LIGHTGBM_REPO_URL..."
-git clone --recursive "$LIGHTGBM_REPO_URL" ; cd LightGBM
+echo "Cloning $LIGHTGBM_REPO_URL ($1)..."
+git clone --recursive "$LIGHTGBM_REPO_URL"; cd LightGBM
 [[ ! -z "$1" ]] && git checkout "$1"
 mkdir build ; cd build
 cmake .. -DUSE_SWIG=ON
