@@ -59,11 +59,11 @@ if [[ -f $BUILD_COMMIT_ID_FILE ]]; then
 fi
 
 echo_stage "Building LightGBM CI docker image replica..."
-bash make_docker_image.sh
+bash docker/make_docker_image.sh
 
 echo_stage "Launching container..."
 container=$(docker run -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env)
-docker cp make_lightgbm.sh $container:/lightgbm
+docker cp docker/lightgbm-ci-build-env/make_lightgbm.sh $container:/lightgbm
 echo_bold "Running container: $container"
 
 echo_stage "Building LightGBM..."
