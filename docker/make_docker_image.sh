@@ -18,5 +18,5 @@
 
 set -e
 
-#cd lightgbm-ci-build-env
+cd docker
 docker build -t lightgbm-ci-build-env lightgbm-ci-build-env

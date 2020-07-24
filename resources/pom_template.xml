@@ -16,7 +16,7 @@
 
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.feedzai.openml.lightgbmlib</groupId>
+  <groupId>com.feedzai.openml.lightgbm.lightgbmlib</groupId>
   <artifactId>lightgbmlib</artifactId>
   <version>${VERSION}</version>
   <packaging>jar</packaging>

@@ -59,14 +59,14 @@ if [[ -f $BUILD_COMMIT_ID_FILE ]]; then
 fi
 
 echo_stage "Building LightGBM CI docker image replica..."
-bash make_docker_image.sh
+bash docker/make_docker_image.sh
 
 echo_stage "Launching container..."
 container=$(docker run -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env)
-docker cp make_lightgbm.sh $container:/lightgbm
+docker cp docker/lightgbm-ci-build-env/make_lightgbm.sh $container:/lightgbm
 echo_bold "Running container: $container"
 
-echo_stage "Building LightGBM..."
+echo_stage "Building LightGBM $LIGHTGBM_VERSION..."
 docker container exec $container bash make_lightgbm.sh "$LIGHTGBM_VERSION"
 
 echo_stage "Copying artifacts to build/ ..."
@@ -86,9 +86,8 @@ date +"%y/%m/%d %T" > build/__timestamp__
 echo "$LIGHTGBM_REPO_URL" > build/__lightgbm_repo_url__
 
 echo_bold "Create pom..."
-bash make_pom.sh "$LIGHTGBM_VERSION" "$PACKAGE_VERSION"
-cp install_jar_locally.sh build/
-cp resources/libopenmp.licence build/
+bash resources/make_pom.sh "$LIGHTGBM_VERSION" "$PACKAGE_VERSION"
+cp resources/copy_to_build/* build/
 
 echo_stage "Cleaning up..."
 echo_bold "Stopping and removing container..."
