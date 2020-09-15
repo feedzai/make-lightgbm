@@ -38,25 +38,39 @@ function echo_bold() {
     echo -e "\e[1m$1\e[0m"
 }
 
+
 echo_stage "Checking need to build a new version..."
 BUILD_COMMIT_ID_FILE=build/__commit_id__
-if [[ -f $BUILD_COMMIT_ID_FILE ]]; then
-    # Query tag's commit:
-    REQUESTED_BUILD_VERSION_COMMIT=`git ls-remote $LIGHTGBM_REPO_URL $LIGHTGBM_VERSION | cut -f1`
-    # No output? Error or queried a valid commit id. Assume it is a commit:
-    REQUESTED_BUILD_VERSION_COMMIT=${REQUESTED_BUILD_VERSION_COMMIT:-$LIGHTGBM_VERSION}
 
+## Compute requested commit id from git command
+# Query tag's commit:
+REQUESTED_BUILD_VERSION_COMMIT=`git ls-remote $LIGHTGBM_REPO_URL $LIGHTGBM_VERSION | cut -f1`
+# No output? Error or queried a valid commit id. Assume it is a commit:
+REQUESTED_BUILD_VERSION_COMMIT=${REQUESTED_BUILD_VERSION_COMMIT:-$LIGHTGBM_VERSION}
+
+## Check build/ for the latest build. Does it match the requested one? If so, skip.
+if [[ -f $BUILD_COMMIT_ID_FILE ]]; then
     BUILT_COMMIT_ID=`cat $BUILD_COMMIT_ID_FILE`
     if [[ "$BUILT_COMMIT_ID" == "$REQUESTED_BUILD_VERSION_COMMIT" ]]; then
         echo "Found build/ contents to be up-to-date. Skipping build."
         exit
-    else
-        echo "build/ is not up-to-date. Proceeding with build."
-
-        echo "Old build commit id: $BUILT_COMMIT_ID"
-        echo "New build commit id: $REQUESTED_BUILD_VERSION_COMMIT"
     fi
 fi
+
+## Check build_cache/ for a build of the requested commit. Found one? Skip.
+if [[ -d "build_cache/$REQUESTED_BUILD_VERSION_COMMIT" ]]; then
+    echo "Found build in build_cache/. Copying build_cache to build/..."
+    rm -rf build
+    cp -r "build_cache/$REQUESTED_BUILD_VERSION_COMMIT" build
+    echo "Build cache restored. Skipping build."
+    exit
+fi
+
+## Tough luck, no caches, build from scratch.
+echo "build/ is not up-to-date and no build caches found. Proceeding with build."
+echo "Old build commit id: $BUILT_COMMIT_ID"
+echo "New build commit id: $REQUESTED_BUILD_VERSION_COMMIT"
+
 
 echo_stage "Building LightGBM CI docker image replica..."
 bash docker/make_docker_image.sh
@@ -92,5 +106,15 @@ cp resources/copy_to_build/* build/
 echo_stage "Cleaning up..."
 echo_bold "Stopping and removing container..."
 docker container rm -f $container
+
+if [[ "$3" == "--cache" ]]; then
+   mkdir -p build_cache
+   echo_stage "Creating build cache..."
+   rm -rf build_cache/tmp
+   echo_bold "Copying build..."
+   cp -r build build_cache/tmp
+   echo_bold "Archiving build cache..."
+   mv build_cache/tmp build_cache/$(cat $BUILD_COMMIT_ID_FILE)
+fi
 
 echo "Build $PACKAGE_VERSION finished for LightGBM $LIGHTGBM_VERSION version."
