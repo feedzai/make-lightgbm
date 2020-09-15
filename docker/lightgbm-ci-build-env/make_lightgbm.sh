@@ -22,7 +22,10 @@ set -e
 
 echo "Cloning $LIGHTGBM_REPO_URL ($1)..."
 git clone --recursive "$LIGHTGBM_REPO_URL"; cd LightGBM
-[[ ! -z "$1" ]] && git checkout "$1"
+if [[ ! -z "$1" ]]; then
+    git checkout "$1"
+    git submodule update --init # needed to fetch the new submodules in dev branches
+fi
 mkdir build ; cd build
 cmake .. -DUSE_SWIG=ON
 make -j4
