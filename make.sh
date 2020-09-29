@@ -47,7 +47,7 @@ BUILD_COMMIT_ID_FILE=build/__commit_id__
 REQUESTED_BUILD_VERSION_COMMIT=`git ls-remote $LIGHTGBM_REPO_URL $LIGHTGBM_VERSION | cut -f1`
 # No output? Error or queried a valid commit id. Assume it is a commit:
 REQUESTED_BUILD_VERSION_COMMIT=${REQUESTED_BUILD_VERSION_COMMIT:-$LIGHTGBM_VERSION}
-
+echo "Requested build version commit ${REQUESTED_BUILD_VERSION_COMMIT}."
 ## Check build/ for the latest build. Does it match the requested one? If so, skip.
 if [[ -f $BUILD_COMMIT_ID_FILE ]]; then
     BUILT_COMMIT_ID=`cat $BUILD_COMMIT_ID_FILE`
@@ -114,7 +114,7 @@ if [[ "$3" == "--cache" ]]; then
    echo_bold "Copying build..."
    cp -r build build_cache/tmp
    echo_bold "Archiving build cache..."
-   mv build_cache/tmp build_cache/$(cat $BUILD_COMMIT_ID_FILE)
+   mv build_cache/tmp build_cache/${REQUESTED_BUILD_VERSION_COMMIT}
 fi
 
 echo "Build $PACKAGE_VERSION finished for LightGBM $LIGHTGBM_VERSION version."
