@@ -20,8 +20,10 @@ set -e
 
 # Usage: $1 serves to checkout a specific commit/tag
 
+
 echo "Cloning $LIGHTGBM_REPO_URL ($1)..."
 git clone --recursive "$LIGHTGBM_REPO_URL"; cd LightGBM
+git config advice.detachedHead false  # Disable warnings for detached head.
 if [[ ! -z "$1" ]]; then
     git checkout "$1"
     git submodule update --init # needed to fetch the new submodules in dev branches
