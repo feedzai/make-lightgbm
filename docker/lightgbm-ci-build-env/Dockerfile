@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:20.04
 
 ### This Dockerfile aims to replace LightGBM's CI Dockerfile environment
 ### for users that don't have Microsoft credentials.
@@ -17,7 +17,6 @@ MAINTAINER Alberto Ferreira (alberto.ferreira@feedzai.com)
 ENV DEBIAN_FRONTEND=noninteractive
 RUN echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections  # dpkg-reconfigure debconf
-RUN rm /etc/apt/preferences.d/ubuntu-esm-infra-trusty
 
 # Trusty needs an updated backport of apt to avoid hash sum mismatch errors
 RUN [ "trusty" = "trusty" ] \
@@ -31,23 +30,23 @@ RUN [ "trusty" = "trusty" ] \
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-        software-properties-common \
- && apt-add-repository ppa:git-core/ppa \
- && apt-get update \
- && apt-get install -y --no-install-recommends \
+        software-properties-common 
+
+RUN apt-add-repository ppa:git-core/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
         apt-utils \
         curl \
         git \
         jq \
-        libcurl3 \
-        libicu52 \
+        libcurl4 \
         libunwind8 \
         netcat \
- && curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash \
- && apt-get install -y --no-install-recommends git-lfs \
- && rm -rf /var/lib/apt/lists/* \
- && rm -rf /etc/apt/sources.list.d/* \
- echo "UPDATED."
+    && curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash \
+    && apt-get install -y --no-install-recommends git-lfs \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /etc/apt/sources.list.d/* \
+    echo "UPDATED."
 
 ############################ LightLBM CI Dockerfile ############################
 
@@ -81,23 +80,10 @@ RUN curl -sL https://cmake.org/files/v3.17/cmake-3.17.0-Linux-x86_64.sh -o cmake
  && rm cmake.sh
 
 # Install clang
-ARG CLANG_VER=9.0.0
-RUN curl -sL https://releases.llvm.org/$CLANG_VER/clang%2bllvm-$CLANG_VER-x86_64-linux-gnu-ubuntu-14.04.tar.xz -o clang.tar.xz \
- && tar -C /usr/local -xf clang.tar.xz --strip 1 \
- && curl -sL https://releases.llvm.org/$CLANG_VER/openmp-$CLANG_VER.src.tar.xz -o openmp.tar.xz \
- && tar -xf openmp.tar.xz \
- && cd openmp-$CLANG_VER.src \
- && mkdir build \
- && cd build \
- && cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang .. \
- && make \
- && make install \
- && echo /usr/local/lib > /etc/ld.so.conf.d/openmp.conf \
- && ldconfig \
- && cd ../.. \
- && rm clang.tar.xz \
- && rm openmp.tar.xz \
- && rm -rf openmp-$CLANG_VER.src
+RUN apt-get update \
+ && apt-get install gpg-agent
+
+RUN bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
 
 # Install Java
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9 \
@@ -135,15 +121,14 @@ ENV CONDA=/opt/conda/
 
 # Install R
 RUN add-apt-repository \
-        "deb https://cloud.r-project.org/bin/linux/ubuntu trusty-cran35/" \
-    && apt-key adv \
-        --keyserver keyserver.ubuntu.com \
-        --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
-    && apt-get update \
+        "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" \
+RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
+
+RUN apt-get update \
     && apt-get install \
         --no-install-recommends \
         -y \
-            r-base-dev=3.6.3-1trusty \
+            r-base-dev \
             pandoc \
             texinfo \
             texlive-latex-recommended \
