@@ -1,3 +1,6 @@
+# Since this image will be used within older operative systems the ubuntu version cannot be updated. Mainly because
+# we require libc version to be 2.12
+# TLDR: do no not change this version
 FROM ubuntu:14.04
 
 ### This Dockerfile aims to replace LightGBM's CI Dockerfile environment
@@ -60,7 +63,21 @@ RUN apt-get update \
     unzip \
     wget \
     zip \
+    make \
+    tar \
  && rm -rf /var/lib/apt/lists/*
+
+# Update ca certificates to safely perform curls
+RUN mkdir -p ~/.ca-certificates-src \
+    && cd ~/.ca-certificates-src \
+    && wget https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/ca-certificates/20210119~20.04.2/ca-certificates_20210119~20.04.2.tar.xz \
+    && tar -xJf ca-certificates_20210119~20.04.2.tar.xz \
+    && cd ca-certificates-20210119~20.04.1 \
+    && sudo rm -rf /usr/share/ca-certificates/* \
+    && sudo make \
+    && sudo make install \
+    && sudo update-ca-certificates --fresh \
+    && /usr/bin/c_rehash /etc/ssl/certs
 
 # Setup the locale
 ENV LANG en_US.UTF-8
