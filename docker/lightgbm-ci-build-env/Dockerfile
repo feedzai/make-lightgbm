@@ -1,5 +1,6 @@
-# Since this image will be used within older operative systems the ubuntu version cannot be updated. Mainly because
-# we require libc version to be 2.12
+# This image uses very specific (and old) versions of the OS and tools. The aim is two-fold.
+# First, to match the build pipeline used for the official Microsoft LightGBM releases, for which there are official tests, avoiding unexpected bugs.
+# Second, retain libc==2.12, to ensure compatibility of the produced LightGBM binaries with any target machine.
 # TLDR: do no not change this version
 FROM ubuntu:14.04
 
