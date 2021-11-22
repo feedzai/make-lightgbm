@@ -69,11 +69,8 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # Update ca certificates to safely perform curls
-RUN mkdir -p ~/.ca-certificates-src \
-    && cd ~/.ca-certificates-src \
-    && wget https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/ca-certificates/20210119~20.04.2/ca-certificates_20210119~20.04.2.tar.xz \
-    && tar -xJf ca-certificates_20210119~20.04.2.tar.xz \
-    && cd ca-certificates-20210119~20.04.1 \
+ADD ca-certificates_20210119~20.04.2.tar.xz /tmp/
+RUN cd /tmp/ca-certificates-20210119~20.04.1 \
     && sudo rm -rf /usr/share/ca-certificates/* \
     && sudo make \
     && sudo make install \
