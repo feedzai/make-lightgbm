@@ -22,7 +22,7 @@ set -e
 
 
 echo "Cloning $LIGHTGBM_REPO_URL ($1)..."
-git clone --recursive "$LIGHTGBM_REPO_URL"; cd LightGBM
+git clone --recursive "$LIGHTGBM_REPO_URL" LightGBM; cd LightGBM
 git config advice.detachedHead false  # Disable warnings for detached head.
 if [[ ! -z "$1" ]]; then
     git checkout "$1"
