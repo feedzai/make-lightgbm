@@ -49,6 +49,34 @@ You can now copy this folder into your project and either run `bash install_jar_
 
 
 
+# Extra: Debugging for developers (local patches)
 
+This explains how to build local patches for LightGBM and have quicker iterations during LightGBM C++ 
+development/debugging. This can be useful to prototype changes in the C++ codebase or debug.
 
+For instance, to perform debugging, one must build LightGBM using the compiler toolchain available 
+on the target machine running the debugger to have symbol compatibility. Using the standard "cross-platform"
+build provided in this repo would lead to symbol compatibility issues, as it uses on purpose a very
+old compiler toolchain to achieve practically a "cross-platform"/universal build that can run on any modern Linux distro.
+
+Patching hence is done in a two-stage process:
+1. Run at least once the base `make.sh` to have the base build.
+2. Patch the base build by calling `make.sh` in patch mode as explained below.
+
+### Preparing the patch build environment
+
+Clone the relevant LightGBM repo/fork to your computer and run CMake with the desired flags:
+```bash
+cd my_lgbm_repo
+mkdir build
+cd build
+cmake .. -DUSE_DEBUG=ON -DUSE_SWIG=ON
+```
+
+### Running `make.sh` in patch mode
+
+After the CMake setup is complete, simply export `$BUILD_LGBM_PATCH_FROM` to that _build_ folder before 
+running `make.sh` as many times as you want.
+
+This will compile LightGBM from source with your settings and patch the base LightGBM build in the provider.
 
