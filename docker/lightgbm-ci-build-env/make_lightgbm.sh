@@ -15,18 +15,19 @@
 #  limitations under the License.
 #
 # @author Alberto Ferreira (alberto.ferreira@feedzai.com)
-
+#
+# Usage: $1 serves to checkout a specific commit/tag
 set -e
 
-# Usage: $1 serves to checkout a specific commit/tag
+LIGHTGBM_VERSION="$1"
 
 
-echo "Cloning $LIGHTGBM_REPO_URL ($1)..."
+echo "Cloning $LIGHTGBM_REPO_URL ($LIGHTGBM_VERSION)..."
 git clone --recursive "$LIGHTGBM_REPO_URL" LightGBM; cd LightGBM
 git config advice.detachedHead false  # Disable warnings for detached head.
-if [[ ! -z "$1" ]]; then
-    git checkout "$1"
-    git submodule update --init # needed to fetch the new submodules in dev branches
+if [[ ! -z "$LIGHTGBM_VERSION" ]]; then
+    git checkout "$LIGHTGBM_VERSION"
+    git submodule update --init --recursive # needed to fetch the new submodules in dev branches
 fi
 mkdir build ; cd build
 cmake .. -DUSE_SWIG=ON

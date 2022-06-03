@@ -49,6 +49,37 @@ You can now copy this folder into your project and either run `bash install_jar_
 
 
 
+# Extra for developers: Building local patches (Debugging for developers)
 
+This explains how to build local patches from source for LightGBM. This allows quicker iterations during LightGBM C++ 
+development/debugging. 
 
+For instance, to perform debugging, one must build LightGBM using the compiler toolchain available 
+on the target machine running the debugger, otherwise there will be symbol compatibility issues.
 
+Patching is done in a two-stage process:
+1. Run at least once the base `make.sh` to have the base build.
+2. Patch the base build by calling `make_patch.sh` as explained below.
+
+## Running `make_patch.sh`
+
+### Setup the LightGBM source for compilation
+
+First, clone the LightGBM repo/fork to your computer and run CMake with the desired flags:
+```bash
+cd my_lgbm_repo
+mkdir build
+cd build
+cmake .. -DUSE_DEBUG=ON -DUSE_SWIG=ON
+```
+
+### Create the patch
+
+After the CMake setup is complete, simply run `make_patch.sh` against that folder:
+```bash
+bash make_patch.sh my_lgbm_repo_build_folder
+```
+
+This will compile LightGBM from source with your settings and patch the current base LightGBM build in the [provider](https://github.com/feedzai/feedzai-openml-java/tree/master/openml-lightgbm/lightgbm-builder).
+
+Run `make_patch.sh` every time you want to build a new patch.

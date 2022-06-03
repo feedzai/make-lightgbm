@@ -18,7 +18,11 @@
 
 set -e
 
+function echo_stage () { echo -e "\n\n\e[1m\e[32m>>>\e[0m \e[1m$1\e[0m\n"; }
+function echo_bold() { echo -e "\e[1m$1\e[0m"; }
+
 export LIGHTGBM_REPO_URL="${LIGHTGBM_REPO_URL:-https://github.com/microsoft/LightGBM}"
+
 
 LIGHTGBM_VERSION=$([[ -z "$1" ]] && echo "master" || echo "$1")
 PACKAGE_VERSION="$2"
@@ -29,14 +33,6 @@ if [[ -z "$PACKAGE_VERSION" ]]; then
         PACKAGE_VERSION="0.0.0"
     fi
 fi
-
-function echo_stage () {
-    echo -e "\n\n\e[1m\e[32m>>>\e[0m \e[1m$1\e[0m\n"
-}
-
-function echo_bold() {
-    echo -e "\e[1m$1\e[0m"
-}
 
 
 echo_stage "Checking need to build a new version..."
