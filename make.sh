@@ -17,27 +17,11 @@
 # @author Alberto Ferreira (alberto.ferreira@feedzai.com)
 
 set -e
-function echo_stage () {
-    echo -e "\n\n\e[1m\e[32m>>>\e[0m \e[1m$1\e[0m\n"
-}
 
-function echo_bold() {
-    echo -e "\e[1m$1\e[0m"
-}
+function echo_stage () { echo -e "\n\n\e[1m\e[32m>>>\e[0m \e[1m$1\e[0m\n"; }
+function echo_bold() { echo -e "\e[1m$1\e[0m"; }
 
 export LIGHTGBM_REPO_URL="${LIGHTGBM_REPO_URL:-https://github.com/microsoft/LightGBM}"
-
-if [[ ! -z "$BUILD_LGBM_PATCH_FROM" ]]; then
-  echo_stage "Building LGBM patch from source!"
-  CWD="$(pwd)"
-  cd "$BUILD_LGBM_PATCH_FROM"
-  make -j4
-  find . -name "*.so" -exec cp {} "${CWD}/build" \;
-  cp lightgbmlib.jar "${CWD}/build"
-  # If not available on your platform comment loading this shared library during debugging:
-  cp /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 "${CWD}/build"
-  exit
-fi
 
 
 LIGHTGBM_VERSION=$([[ -z "$1" ]] && echo "master" || echo "$1")
