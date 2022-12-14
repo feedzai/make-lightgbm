@@ -48,7 +48,7 @@ RUN apt-get update \
         libunwind8 \
         netcat \
  && curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash \
- && apt-get install -y --no-install-recommends git-lfs \
+ && apt-get install -y --no-install-recommends --allow-unauthenticated git-lfs \
  && rm -rf /var/lib/apt/lists/* \
  && rm -rf /etc/apt/sources.list.d/* \
  echo "UPDATED."
