@@ -115,15 +115,15 @@ RUN curl -sL https://releases.llvm.org/$CLANG_VER/clang%2bllvm-$CLANG_VER-x86_64
  && rm -rf openmp-$CLANG_VER.src
 
 # Install Java
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9 \
- && add-apt-repository "deb http://repos.azulsystems.com/ubuntu stable main" -y \
- && apt-get update \
- && apt-get install -y --no-install-recommends \
-    zulu-8 \
- && rm -rf /var/lib/apt/lists/*
-
-ENV JAVA_HOME_8_X64=/usr/lib/jvm/zulu-8-amd64
-ENV JAVA_HOME=$JAVA_HOME_8_X64
+ARG JAVA_ZULU_DOWNLOAD_VERSION=zulu8.72.0.17-ca-jdk8.0.382-linux_x64
+ARG JAVA_ZULU_SHA256=7b15a56f2ae005beda0f875a269b3daad14ffa12969306cc745478385b25ba96
+RUN mkdir /java \
+    && curl https://cdn.azul.com/zulu/bin/${JAVA_ZULU_DOWNLOAD_VERSION}.tar.gz -o java.tar.gz \
+    && if [[ "$(sha256sum java.tar.gz | cut -d " " -f1)" != "${JAVA_ZULU_SHA256}" ]]; then echo "INVALID DOWNLOAD HASH!"; exit 1; fi \
+    && tar -xzvf java.tar.gz -C /java \
+    && rm java.tar.gz
+ENV JAVA_HOME="/java/${JAVA_ZULU_DOWNLOAD_VERSION}"
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # Install SWIG
 RUN curl -sL https://downloads.sourceforge.net/project/swig/swig/swig-3.0.12/swig-3.0.12.tar.gz -o swig.tar.gz \
@@ -135,36 +135,6 @@ RUN curl -sL https://downloads.sourceforge.net/project/swig/swig/swig-3.0.12/swi
  && cd .. \
  && rm swig.tar.gz \
  && rm -rf swig-3.0.12
-
-# Install Miniconda
-RUN curl -sL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o miniconda.sh \
- && chmod +x miniconda.sh \
- && ./miniconda.sh -b -p /opt/conda \
- && rm miniconda.sh \
- && /opt/conda/bin/conda install python=3 -q -y \
- && /opt/conda/bin/conda install mkl qt -q -y \
- && /opt/conda/bin/conda clean -a -y \
- && chmod -R 777 /opt/conda
-
-ENV CONDA=/opt/conda/
-
-# Install R
-RUN add-apt-repository \
-        "deb https://cloud.r-project.org/bin/linux/ubuntu trusty-cran35/" \
-    && apt-key adv \
-        --keyserver keyserver.ubuntu.com \
-        --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
-    && apt-get update \
-    && apt-get install \
-        --no-install-recommends \
-        -y \
-            r-base-dev=3.6.3-1trusty \
-            pandoc \
-            texinfo \
-            texlive-latex-recommended \
-            texlive-fonts-recommended \
-            texlive-fonts-extra \
-            qpdf
 
 # Clean system
 RUN apt-get clean \
