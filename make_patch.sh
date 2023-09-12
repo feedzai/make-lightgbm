@@ -27,7 +27,7 @@ if [[ -z "$BUILD_LGBM_PATCH_FROM" ]]; then
     echo "ERROR: Specify lightgbm/build/ folder where to build a patch from."
     exit 1
 fi
-if [[ ! -f build/lib_lightgbm.so ]]; then
+if [[ ! -f build/amd64/lib_lightgbm.so ]]; then
     echo "ERROR: Run make.sh before make_patch.sh."
     exit 1
 fi
@@ -37,8 +37,8 @@ echo_bold "Compiling with existing CMake settings at build_dir=${BUILD_LGBM_PATC
 CWD="$(pwd)"
 cd "$BUILD_LGBM_PATCH_FROM"
 make -j4
-find . -name "*.so" -exec cp {} "${CWD}/build" \;
+find . -name "*.so" -exec cp {} "${CWD}/build/amd64" \;
 cp lightgbmlib.jar "${CWD}/build"
-cp $(ldd "${CWD}/build/lib_lightgbm.so" | awk '/libgomp/{print $3}') "${CWD}/build/libgomp.so.1.0.0"
+cp $(ldd "${CWD}/build/amd64/lib_lightgbm.so" | awk '/libgomp/{print $3}') "${CWD}/build/amd64/libgomp.so.1.0.0"
 
 echo_bold "Patched LightGBM build."

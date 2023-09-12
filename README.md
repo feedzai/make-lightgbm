@@ -7,6 +7,7 @@ This repo serves to build all the needed LightGBM artifacts to create a Java lib
 - bash & sed
 - docker
 - git
+- qemu (in case you want to compile also for ARM64; [see more](https://docs.docker.com/build/building/multi-platform/#qemu))
 
 # How to use
 
@@ -27,17 +28,28 @@ Finally, in the output `pom.xml`, the package version is the one specified in `p
 
 By defining the environment variable `LIGHTGBM_REPO_URL` which by default points to [LightGBM](https://github.com/microsoft/LightGBM), to another `http(s)` git LightGBM repo URL, you can build your own custom version of LightGBM. This can be useful to try building our own patched/custom versions of LightGBM. Ensure you use the _http(s)_ protocol instead of _git_.
 
+### Single build for AMD64
+
+In case you want to build only for AMD64, which doesn't have to use qemu emulation, you must define the environment variable `ARCH_BUILD=single` prior to running `make.sh`.
+
 ## Output artifacts
 
 This is the output:
 ```bash
 build
+├── amd64
+│   ├── libgomp.so.1.0.0
+│   ├── lib_lightgbm.so
+│   └── lib_lightgbm_swig.so
+├── arm64
+│   ├── libgomp.so.1.0.0
+│   ├── lib_lightgbm.so
+│   └── lib_lightgbm_swig.so
 ├── __commit_id__
 ├── install_jar_locally.sh
-├── libgomp.so.1.0.0
-├── lib_lightgbm.so
-├── lib_lightgbm_swig.so
+├── libopenmp.licence
 ├── lightgbmlib.jar
+├── __lightgbm_repo_url__
 ├── pom.xml
 ├── __timestamp__
 └── __version__
@@ -46,7 +58,6 @@ build
 Files with "__" are just single-line files containing meta-data for traceability so you don't lose track of build conditions.
 
 You can now copy this folder into your project and either run `bash install_jar_locally.sh` or use maven's install plugin.
-
 
 
 # Extra for developers: Building local patches (Debugging for developers)
