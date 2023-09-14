@@ -7,7 +7,6 @@ This repo serves to build all the needed LightGBM artifacts to create a Java lib
 - bash & sed
 - docker
 - git
-- qemu (in case you want to compile also for ARM64; [see more](https://docs.docker.com/build/building/multi-platform/#qemu))
 
 # How to use
 
@@ -16,6 +15,12 @@ To generate the `build/` folder with all necessary artifacts just run:
 ```bash
 bash make.sh [lightgbm_version] [package_version] # where lightgbm_version is any of (commit_id, tag, branch)
 ```
+
+In case it fails compiling for ARM64 you may need to run:
+```bash
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+```
+
 If no `lightgbm_version` is specified, `master` is checked out.
 
 If no `package_version` is specified:
