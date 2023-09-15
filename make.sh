@@ -76,12 +76,12 @@ if [[ "$ARCH_BUILD" != "single" ]]; then
     bash docker/make_docker_image.sh arm64
 fi
 
-echo_stage "Launching container AMD64..."
+echo_stage "Launching AMD64 container..."
 container_amd64=$(docker run -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env-amd64)
 docker cp docker/make_lightgbm.sh $container_amd64:/lightgbm
-echo_bold "Running container AMD64: $container_amd64"
+echo_bold "Running AMD64 container: $container_amd64"
 
-echo_stage "Building LightGBM AMD64 $LIGHTGBM_VERSION..."
+echo_stage "Building AMD64 LightGBM $LIGHTGBM_VERSION..."
 docker container exec $container_amd64 bash make_lightgbm.sh "$LIGHTGBM_VERSION"
 
 if [[ "$ARCH_BUILD" != "single" ]]; then
