@@ -34,6 +34,8 @@ if [[ -z "$PACKAGE_VERSION" ]]; then
     fi
 fi
 
+# If $ARCH_BUILD == single we generate only artifacts for AMD64
+ARCH_BUILD="${ARCH_BUILD:-multi}"
 
 echo_stage "Checking need to build a new version..."
 BUILD_COMMIT_ID_FILE=build/__commit_id__
@@ -67,30 +69,49 @@ echo "build/ is not up-to-date and no build caches found. Proceeding with build.
 echo "Old build commit id: $BUILT_COMMIT_ID"
 echo "New build commit id: $REQUESTED_BUILD_VERSION_COMMIT"
 
+echo_stage "Building LightGBM CI docker image replicas..."
+bash docker/make_docker_image.sh amd64
 
-echo_stage "Building LightGBM CI docker image replica..."
-bash docker/make_docker_image.sh
+if [[ "$ARCH_BUILD" != "single" ]]; then
+    bash docker/make_docker_image.sh arm64
+fi
 
-echo_stage "Launching container..."
-container=$(docker run -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env)
-docker cp docker/lightgbm-ci-build-env/make_lightgbm.sh $container:/lightgbm
-echo_bold "Running container: $container"
+echo_stage "Launching AMD64 container..."
+container_amd64=$(docker run -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env-amd64)
+docker cp docker/make_lightgbm.sh $container_amd64:/lightgbm
+echo_bold "Running AMD64 container: $container_amd64"
 
-echo_stage "Building LightGBM $LIGHTGBM_VERSION..."
-docker container exec $container bash make_lightgbm.sh "$LIGHTGBM_VERSION"
+echo_stage "Building AMD64 LightGBM $LIGHTGBM_VERSION..."
+docker container exec $container_amd64 bash make_lightgbm.sh "$LIGHTGBM_VERSION"
+
+if [[ "$ARCH_BUILD" != "single" ]]; then
+    echo_stage "Launching ARM64 container..."
+    container_arm64=$(docker run --platform=arm64 -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env-arm64)
+    docker cp docker/make_lightgbm.sh $container_arm64:/lightgbm
+    echo_stage "Building ARM64 LightGBM $LIGHTGBM_VERSION..."
+    docker container exec $container_arm64 bash make_lightgbm.sh "$LIGHTGBM_VERSION"
+fi
 
 echo_stage "Copying artifacts to build/ ..."
 rm -rf build
-mkdir build
+mkdir -p build/amd64
+mkdir -p build/arm64
 
-FROM="$container:/lightgbm/LightGBM"
-docker cp $FROM/lib_lightgbm.so build
-docker cp $FROM/lib_lightgbm_swig.so build
-docker cp $FROM/build/lightgbmlib.jar build
-docker cp $container:/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 build
+FROM_AMD64="$container_amd64:/lightgbm/LightGBM"
+docker cp $FROM_AMD64/lib_lightgbm.so build/amd64
+docker cp $FROM_AMD64/lib_lightgbm_swig.so build/amd64
+docker cp $FROM_AMD64/build/lightgbmlib.jar build
+docker cp $container_amd64:/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 build/amd64
+
+if [[ "$ARCH_BUILD" != "single" ]]; then
+    FROM_ARM64="$container_arm64:/lightgbm/LightGBM"
+    docker cp $FROM_ARM64/lib_lightgbm.so build/arm64
+    docker cp $FROM_ARM64/lib_lightgbm_swig.so build/arm64
+    docker cp $container_arm64:/usr/lib/aarch64-linux-gnu/libgomp.so.1.0.0 build/arm64
+fi
 
 # Place version information
-docker cp $FROM/build/__commit_id__ build
+docker cp $FROM_AMD64/build/__commit_id__ build
 echo "$LIGHTGBM_VERSION" > build/__version__
 date +"%y/%m/%d %T" > build/__timestamp__
 echo "$LIGHTGBM_REPO_URL" > build/__lightgbm_repo_url__
@@ -100,17 +121,20 @@ bash resources/make_pom.sh "$LIGHTGBM_VERSION" "$PACKAGE_VERSION"
 cp resources/copy_to_build/* build/
 
 echo_stage "Cleaning up..."
-echo_bold "Stopping and removing container..."
-docker container rm -f $container
+echo_bold "Stopping and removing containers..."
+docker container rm -f $container_amd64
+if [[ "$ARCH_BUILD" != "single" ]]; then
+    docker container rm -f $container_arm64
+fi
 
 if [[ "$3" == "--cache" ]]; then
-   mkdir -p build_cache
-   echo_stage "Creating build cache..."
-   rm -rf build_cache/tmp
-   echo_bold "Copying build..."
-   cp -r build build_cache/tmp
-   echo_bold "Archiving build cache..."
-   mv build_cache/tmp build_cache/${REQUESTED_BUILD_VERSION_COMMIT}
+    mkdir -p build_cache
+    echo_stage "Creating build cache..."
+    rm -rf build_cache/tmp
+    echo_bold "Copying build..."
+    cp -r build build_cache/tmp
+    echo_bold "Archiving build cache..."
+    mv build_cache/tmp build_cache/${REQUESTED_BUILD_VERSION_COMMIT}
 fi
 
 echo "Build $PACKAGE_VERSION finished for LightGBM $LIGHTGBM_VERSION version."

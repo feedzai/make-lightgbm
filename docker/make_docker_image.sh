@@ -19,4 +19,18 @@
 set -e
 
 cd docker
-docker build -t lightgbm-ci-build-env lightgbm-ci-build-env
+
+case "$1" in
+    arm64)
+        echo "Building docker image for ARM64"
+        docker build -t lightgbm-ci-build-env-arm64 --platform=arm64 lightgbm-ci-build-env-arm64
+        ;;
+    amd64)
+        echo "Building docker image for AMD64"
+        docker build -t lightgbm-ci-build-env-amd64 lightgbm-ci-build-env-amd64
+        ;;
+    *)
+        echo $"Usage $0 {amd64|arm64}"
+        exit 1
+esac
+

@@ -15,6 +15,12 @@ To generate the `build/` folder with all necessary artifacts just run:
 ```bash
 bash make.sh [lightgbm_version] [package_version] # where lightgbm_version is any of (commit_id, tag, branch)
 ```
+
+In case it fails compiling for ARM64 you may need to run:
+```bash
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+```
+
 If no `lightgbm_version` is specified, `master` is checked out.
 
 If no `package_version` is specified:
@@ -27,17 +33,28 @@ Finally, in the output `pom.xml`, the package version is the one specified in `p
 
 By defining the environment variable `LIGHTGBM_REPO_URL` which by default points to [LightGBM](https://github.com/microsoft/LightGBM), to another `http(s)` git LightGBM repo URL, you can build your own custom version of LightGBM. This can be useful to try building our own patched/custom versions of LightGBM. Ensure you use the _http(s)_ protocol instead of _git_.
 
+### Single build for AMD64
+
+In case you want to build only for AMD64, which doesn't have to use qemu emulation, you must define the environment variable `ARCH_BUILD=single` prior to running `make.sh`.
+
 ## Output artifacts
 
 This is the output:
 ```bash
 build
+├── amd64
+│   ├── libgomp.so.1.0.0
+│   ├── lib_lightgbm.so
+│   └── lib_lightgbm_swig.so
+├── arm64
+│   ├── libgomp.so.1.0.0
+│   ├── lib_lightgbm.so
+│   └── lib_lightgbm_swig.so
 ├── __commit_id__
 ├── install_jar_locally.sh
-├── libgomp.so.1.0.0
-├── lib_lightgbm.so
-├── lib_lightgbm_swig.so
+├── libopenmp.licence
 ├── lightgbmlib.jar
+├── __lightgbm_repo_url__
 ├── pom.xml
 ├── __timestamp__
 └── __version__
@@ -46,7 +63,6 @@ build
 Files with "__" are just single-line files containing meta-data for traceability so you don't lose track of build conditions.
 
 You can now copy this folder into your project and either run `bash install_jar_locally.sh` or use maven's install plugin.
-
 
 
 # Extra for developers: Building local patches (Debugging for developers)
@@ -74,6 +90,9 @@ cmake .. -DUSE_DEBUG=ON -DUSE_SWIG=ON
 ```
 
 ### Create the patch
+
+> **Note**  
+The patch only applies to AMD64 builds. It doesn't change other architectures' builds (e.g., ARM64) 
 
 After the CMake setup is complete, simply run `make_patch.sh` against that folder:
 ```bash
