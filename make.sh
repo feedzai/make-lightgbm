@@ -85,10 +85,10 @@ echo_stage "Building AMD64 LightGBM $LIGHTGBM_VERSION..."
 docker container exec $container_amd64 bash make_lightgbm.sh "$LIGHTGBM_VERSION"
 
 if [[ "$ARCH_BUILD" != "single" ]]; then
-    echo_stage "Launching container ARM64..."
+    echo_stage "Launching ARM64 container..."
     container_arm64=$(docker run --platform=arm64 -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env-arm64)
     docker cp docker/make_lightgbm.sh $container_arm64:/lightgbm
-    echo_stage "Building LightGBM ARM64 $LIGHTGBM_VERSION..."
+    echo_stage "Building ARM64 LightGBM $LIGHTGBM_VERSION..."
     docker container exec $container_arm64 bash make_lightgbm.sh "$LIGHTGBM_VERSION"
 fi
 
