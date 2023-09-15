@@ -26,8 +26,6 @@ export LIGHTGBM_REPO_URL="${LIGHTGBM_REPO_URL:-https://github.com/microsoft/Ligh
 
 LIGHTGBM_VERSION=$([[ -z "$1" ]] && echo "master" || echo "$1")
 PACKAGE_VERSION="$2"
-# If $ARCH_BUILD == single we generate only artifacts for AMD64
-ARCH_BUILD="${ARCH_BUILD:-multi}"
 if [[ -z "$PACKAGE_VERSION" ]]; then
     if [[ "$LIGHTGBM_VERSION" =~ v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
         PACKAGE_VERSION=${LIGHTGBM_VERSION:1} # strip 'v'
@@ -35,6 +33,9 @@ if [[ -z "$PACKAGE_VERSION" ]]; then
         PACKAGE_VERSION="0.0.0"
     fi
 fi
+
+# If $ARCH_BUILD == single we generate only artifacts for AMD64
+ARCH_BUILD="${ARCH_BUILD:-multi}"
 
 echo_stage "Checking need to build a new version..."
 BUILD_COMMIT_ID_FILE=build/__commit_id__
@@ -72,7 +73,7 @@ echo_stage "Building LightGBM CI docker image replicas..."
 bash docker/make_docker_image.sh amd64
 
 if [[ "$ARCH_BUILD" != "single" ]]; then
-  bash docker/make_docker_image.sh arm64
+    bash docker/make_docker_image.sh arm64
 fi
 
 echo_stage "Launching container AMD64..."
@@ -84,11 +85,11 @@ echo_stage "Building LightGBM AMD64 $LIGHTGBM_VERSION..."
 docker container exec $container_amd64 bash make_lightgbm.sh "$LIGHTGBM_VERSION"
 
 if [[ "$ARCH_BUILD" != "single" ]]; then
-  echo_stage "Launching container ARM64..."
-  container_arm64=$(docker run --platform=arm64 -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env-arm64)
-  docker cp docker/make_lightgbm.sh $container_arm64:/lightgbm
-  echo_stage "Building LightGBM ARM64 $LIGHTGBM_VERSION..."
-  docker container exec $container_arm64 bash make_lightgbm.sh "$LIGHTGBM_VERSION"
+    echo_stage "Launching container ARM64..."
+    container_arm64=$(docker run --platform=arm64 -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env-arm64)
+    docker cp docker/make_lightgbm.sh $container_arm64:/lightgbm
+    echo_stage "Building LightGBM ARM64 $LIGHTGBM_VERSION..."
+    docker container exec $container_arm64 bash make_lightgbm.sh "$LIGHTGBM_VERSION"
 fi
 
 echo_stage "Copying artifacts to build/ ..."
@@ -103,10 +104,10 @@ docker cp $FROM_AMD64/build/lightgbmlib.jar build
 docker cp $container_amd64:/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 build/amd64
 
 if [[ "$ARCH_BUILD" != "single" ]]; then
-  FROM_ARM64="$container_arm64:/lightgbm/LightGBM"
-  docker cp $FROM_ARM64/lib_lightgbm.so build/arm64
-  docker cp $FROM_ARM64/lib_lightgbm_swig.so build/arm64
-  docker cp $container_arm64:/usr/lib/aarch64-linux-gnu/libgomp.so.1.0.0 build/arm64
+    FROM_ARM64="$container_arm64:/lightgbm/LightGBM"
+    docker cp $FROM_ARM64/lib_lightgbm.so build/arm64
+    docker cp $FROM_ARM64/lib_lightgbm_swig.so build/arm64
+    docker cp $container_arm64:/usr/lib/aarch64-linux-gnu/libgomp.so.1.0.0 build/arm64
 fi
 
 # Place version information
@@ -123,17 +124,17 @@ echo_stage "Cleaning up..."
 echo_bold "Stopping and removing containers..."
 docker container rm -f $container_amd64
 if [[ "$ARCH_BUILD" != "single" ]]; then
-  docker container rm -f $container_arm64
+    docker container rm -f $container_arm64
 fi
 
 if [[ "$3" == "--cache" ]]; then
-   mkdir -p build_cache
-   echo_stage "Creating build cache..."
-   rm -rf build_cache/tmp
-   echo_bold "Copying build..."
-   cp -r build build_cache/tmp
-   echo_bold "Archiving build cache..."
-   mv build_cache/tmp build_cache/${REQUESTED_BUILD_VERSION_COMMIT}
+    mkdir -p build_cache
+    echo_stage "Creating build cache..."
+    rm -rf build_cache/tmp
+    echo_bold "Copying build..."
+    cp -r build build_cache/tmp
+    echo_bold "Archiving build cache..."
+    mv build_cache/tmp build_cache/${REQUESTED_BUILD_VERSION_COMMIT}
 fi
 
 echo "Build $PACKAGE_VERSION finished for LightGBM $LIGHTGBM_VERSION version."

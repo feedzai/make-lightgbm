@@ -91,6 +91,9 @@ cmake .. -DUSE_DEBUG=ON -DUSE_SWIG=ON
 
 ### Create the patch
 
+> **Note**  
+The patch only applies to AMD64 builds. It doesn't change other architectures' builds (e.g., ARM64) 
+
 After the CMake setup is complete, simply run `make_patch.sh` against that folder:
 ```bash
 bash make_patch.sh my_lgbm_repo_build_folder

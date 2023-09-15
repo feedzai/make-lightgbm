@@ -16,6 +16,14 @@
 #
 # @author Alberto Ferreira (alberto.ferreira@feedzai.com)
 
+################################################################
+# ************************ ImplNote ************************** #
+#                                                              #
+# This patch only applies to AMD64 builds. It doesn't change   #
+# other architectures' builds (e.g., ARM64)                    #
+#                                                              #
+################################################################
+
 set -e
 
 function echo_stage () { echo -e "\n\n\e[1m\e[32m>>>\e[0m \e[1m$1\e[0m\n"; }
