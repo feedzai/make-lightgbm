@@ -76,9 +76,11 @@ if [[ "$ARCH_BUILD" != "single" ]]; then
     bash docker/make_docker_image.sh arm64
 fi
 
+bash docker/make_docker_image.sh alpine
+
 echo_stage "Launching AMD64 container..."
 container_amd64=$(docker run -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env-amd64)
-docker cp docker/make_lightgbm.sh $container_amd64:/lightgbm
+docker cp docker/make_lightgbm.sh $container_amd64:/lightgbm/make_lightgbm.sh
 echo_bold "Running AMD64 container: $container_amd64"
 
 echo_stage "Building AMD64 LightGBM $LIGHTGBM_VERSION..."
@@ -92,10 +94,19 @@ if [[ "$ARCH_BUILD" != "single" ]]; then
     docker container exec $container_arm64 bash make_lightgbm.sh "$LIGHTGBM_VERSION"
 fi
 
+echo_stage "Launching Alpine container..."
+container_alpine=$(docker run -e LIGHTGBM_REPO_URL -t -d lightgbm-ci-build-env-alpine)
+docker cp docker/make_lightgbm.sh $container_alpine:/lightgbm/make_lightgbm.sh
+echo_bold "Running Alpine container: $container_alpine"
+
+echo_stage "Building Alpine LightGBM $LIGHTGBM_VERSION..."
+docker container exec $container_alpine bash make_lightgbm.sh "$LIGHTGBM_VERSION"
+
 echo_stage "Copying artifacts to build/ ..."
 rm -rf build
 mkdir -p build/amd64
 mkdir -p build/arm64
+mkdir -p build/alpine
 
 FROM_AMD64="$container_amd64:/lightgbm/LightGBM"
 docker cp $FROM_AMD64/lib_lightgbm.so build/amd64
@@ -109,6 +120,12 @@ if [[ "$ARCH_BUILD" != "single" ]]; then
     docker cp $FROM_ARM64/lib_lightgbm_swig.so build/arm64
     docker cp $container_arm64:/usr/lib/aarch64-linux-gnu/libgomp.so.1.0.0 build/arm64
 fi
+
+FROM_ALPINE="$container_alpine:/lightgbm/LightGBM"
+docker cp $FROM_ALPINE/lib_lightgbm.so build/alpine
+docker cp $FROM_ALPINE/lib_lightgbm_swig.so build/alpine
+docker cp $FROM_ALPINE/build/lightgbmlib.jar build
+docker cp $container_alpine:/usr/lib/libgomp.so.1.0.0 build/alpine
 
 # Place version information
 docker cp $FROM_AMD64/build/__commit_id__ build
