@@ -2,7 +2,7 @@ FROM alpine:3.18.4
 
 RUN apk add git \
     cmake=3.26.5-r0 \
-    make=4.4.1-r2 \
+    make \
     g++=12.2.1_git20220924-r10 \
     tar \
     zip \
