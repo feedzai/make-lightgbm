@@ -2,17 +2,12 @@ FROM alpine:3.18.4
 
 RUN apk add git \
     cmake=3.26.5-r0 \
-    make \
+    make=4.4.1-r2 \
     g++=12.2.1_git20220924-r10 \
     tar \
     zip \
     curl \
     bash
-
-RUN cmake --version
-RUN make --version
-RUN gcc --version
-RUN g++ --version
 
 # Install Java
 ARG JAVA_ZULU_DOWNLOAD_VERSION=zulu8.72.0.17-ca-jdk8.0.382-linux_musl_x64
