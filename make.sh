@@ -105,7 +105,7 @@ docker container exec $container_alpine bash make_lightgbm.sh "$LIGHTGBM_VERSION
 echo_stage "Copying artifacts to build/ ..."
 rm -rf build
 mkdir -p build/amd64/glibc
-mkdir -p build/amd64/alpine
+mkdir -p build/amd64/musl
 mkdir -p build/arm64
 
 FROM_AMD64="$container_amd64:/lightgbm/LightGBM"
@@ -122,9 +122,9 @@ if [[ "$ARCH_BUILD" != "single" ]]; then
 fi
 
 FROM_ALPINE="$container_alpine:/lightgbm/LightGBM"
-docker cp $FROM_ALPINE/lib_lightgbm.so build/amd64/alpine
-docker cp $FROM_ALPINE/lib_lightgbm_swig.so build/amd64/alpine
-docker cp $container_alpine:/usr/lib/libgomp.so.1.0.0 build/amd64/alpine
+docker cp $FROM_ALPINE/lib_lightgbm.so build/amd64/musl
+docker cp $FROM_ALPINE/lib_lightgbm_swig.so build/amd64/musl
+docker cp $container_alpine:/usr/lib/libgomp.so.1.0.0 build/amd64/musl
 
 # Place version information
 docker cp $FROM_AMD64/build/__commit_id__ build

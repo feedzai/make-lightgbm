@@ -47,7 +47,7 @@ build
 │   │   ├── libgomp.so.1.0.0
 │   │   ├── lib_lightgbm.so
 │   │   └── lib_lightgbm_swig.so
-│   ├── alpine
+│   ├── musl
 │   │   ├── libgomp.so.1.0.0
 │   │   ├── lib_lightgbm.so
 │   │   └── lib_lightgbm_swig.so
