@@ -43,9 +43,14 @@ This is the output:
 ```bash
 build
 ├── amd64
-│   ├── libgomp.so.1.0.0
-│   ├── lib_lightgbm.so
-│   └── lib_lightgbm_swig.so
+│   ├── glibc
+│   │   ├── libgomp.so.1.0.0
+│   │   ├── lib_lightgbm.so
+│   │   └── lib_lightgbm_swig.so
+│   ├── musl
+│   │   ├── libgomp.so.1.0.0
+│   │   ├── lib_lightgbm.so
+│   │   └── lib_lightgbm_swig.so
 ├── arm64
 │   ├── libgomp.so.1.0.0
 │   ├── lib_lightgbm.so

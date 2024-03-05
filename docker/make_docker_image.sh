@@ -29,6 +29,10 @@ case "$1" in
         echo "Building docker image for AMD64"
         docker build -t lightgbm-ci-build-env-amd64 lightgbm-ci-build-env-amd64
         ;;
+    alpine)
+        echo "Building docker image for Alpine with musl"
+        docker build -t lightgbm-ci-build-env-alpine lightgbm-ci-build-env-alpine
+        ;;
     *)
         echo $"Usage $0 {amd64|arm64}"
         exit 1
